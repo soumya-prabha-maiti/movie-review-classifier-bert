@@ -7,8 +7,10 @@ import re
 import gradio as gr
 import numpy as np
 import torch
+
+# %%
 from dotenv import load_dotenv
-from transformers import BertForSequenceClassification, BertTokenizer
+from transformers import BertForSequenceClassification, BertTokenizer, PretrainedConfig
 
 from gdrive_utils import GDriveUtils
 
@@ -16,15 +18,17 @@ from gdrive_utils import GDriveUtils
 # # Config
 
 
-# %%
-from dotenv import load_dotenv
 load_dotenv()
 
 MODEL_WEIGHTS_GDRIVE_FILE_ID = os.environ.get("MODEL_WEIGHTS_GDRIVE_FILE_ID")
-MODEL_WEIGHTS_LOCAL_PATH = os.environ.get("MODEL_WEIGHTS_LOCAL_PATH", "BERT-imdb-weights.pt")
-DOWNLOAD_MODEL_WEIGTHS_FROM_GDRIVE = os.environ.get("DOWNLOAD_MODEL_WEIGTHS_FROM_GDRIVE", "True") == "True"
-LOG_GDRIVE_EVENTS = os.environ.get("LOG_GDRIVE_EVENTS", "True") == 'True'
-
+MODEL_WEIGHTS_LOCAL_PATH = os.environ.get(
+    "MODEL_WEIGHTS_LOCAL_PATH", "BERT-imdb-weights.pt"
+)
+DOWNLOAD_MODEL_WEIGTHS_FROM_GDRIVE = (
+    os.environ.get("DOWNLOAD_MODEL_WEIGTHS_FROM_GDRIVE", "True") == "True"
+)
+LOG_GDRIVE_EVENTS = os.environ.get("LOG_GDRIVE_EVENTS", "True") == "True"
+MODEL_CONFIG_JSON_FILEPATH = "movie-classifier-bert-model-config.json"
 
 GDriveUtils.LOG_EVENTS = LOG_GDRIVE_EVENTS
 
@@ -41,12 +45,8 @@ else:
     print("No GPU available, using CPU")
 
 # %%
-model = BertForSequenceClassification.from_pretrained(
-    "bert-base-uncased",
-    num_labels=2,
-    output_attentions=False,
-    output_hidden_states=False,
-)
+model_config = PretrainedConfig.from_json_file(MODEL_CONFIG_JSON_FILEPATH)
+model = BertForSequenceClassification(config=model_config)
 tokenizer = BertTokenizer.from_pretrained("bert-base-uncased", do_lower_case=True)
 if DOWNLOAD_MODEL_WEIGTHS_FROM_GDRIVE:
     GDriveUtils.download_file_from_gdrive(
@@ -60,6 +60,7 @@ model.device
 # %%
 model.load_state_dict(torch.load(MODEL_WEIGHTS_LOCAL_PATH, map_location=device))
 model.eval()
+
 
 # %%
 def clean_text(x):
@@ -106,8 +107,10 @@ def tokenize_sentences(data):
 
     return input_ids, attention_masks
 
+
 # %% [markdown]
 # # Gradio app
+
 
 # %%
 def process_input(text: str):
