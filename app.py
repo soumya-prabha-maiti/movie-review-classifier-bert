@@ -7,10 +7,9 @@ import re
 import gradio as gr
 import numpy as np
 import torch
-
-# %%
 from dotenv import load_dotenv
-from transformers import BertForSequenceClassification, BertTokenizer, PretrainedConfig
+from transformers import (BertForSequenceClassification, BertTokenizer,
+                          PretrainedConfig)
 
 from gdrive_utils import GDriveUtils
 
@@ -18,6 +17,7 @@ from gdrive_utils import GDriveUtils
 # # Config
 
 
+# %%
 load_dotenv()
 
 MODEL_WEIGHTS_GDRIVE_FILE_ID = os.environ.get("MODEL_WEIGHTS_GDRIVE_FILE_ID")
