@@ -163,4 +163,8 @@ cython_debug/
 
 # Pytorch
 *.pt
+*.pth
+*.ckpt
+*.csv
 flagged/
+lightning_logs/
