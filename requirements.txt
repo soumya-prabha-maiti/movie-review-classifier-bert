@@ -4,3 +4,4 @@ torch==2.4.0
 transformers==4.44.0
 google-api-python-client==2.142.0
 python-dotenv==1.0.0
+lightning==2.4.0
