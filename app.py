@@ -1,6 +1,7 @@
 # %% [markdown]
 # # Libraries
 # %%
+import logging
 import os
 import re
 
@@ -8,10 +9,10 @@ import gradio as gr
 import numpy as np
 import torch
 from dotenv import load_dotenv
-from transformers import (BertForSequenceClassification, BertTokenizer,
-                          PretrainedConfig)
+from transformers import BertForSequenceClassification, BertTokenizer, PretrainedConfig
 
 from gdrive_utils import GDriveUtils
+from lightning_module import Bert
 
 # %% [markdown]
 # # Config
@@ -45,20 +46,30 @@ else:
     print("No GPU available, using CPU")
 
 # %%
-model_config = PretrainedConfig.from_json_file(MODEL_CONFIG_JSON_FILEPATH)
-model = BertForSequenceClassification(config=model_config)
+# Disable logging from transformers library
+
+loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
+for logger in loggers:
+    if "transformers" in logger.name.lower():
+        logger.setLevel(logging.ERROR)
+
+# %%
 tokenizer = BertTokenizer.from_pretrained("bert-base-uncased", do_lower_case=True)
+
+# %%
 if DOWNLOAD_MODEL_WEIGTHS_FROM_GDRIVE:
     GDriveUtils.download_file_from_gdrive(
         MODEL_WEIGHTS_GDRIVE_FILE_ID, MODEL_WEIGHTS_LOCAL_PATH
     )
 
-# %%
-model.to(device)
-model.device
 
 # %%
-model.load_state_dict(torch.load(MODEL_WEIGHTS_LOCAL_PATH, map_location=device))
+model = Bert(
+    from_checkpoint=True, model_config_json_filepath=MODEL_CONFIG_JSON_FILEPATH
+)
+model.load_state_dict(
+    torch.load(MODEL_WEIGHTS_LOCAL_PATH, map_location=device)["state_dict"]
+)
 model.eval()
 
 
