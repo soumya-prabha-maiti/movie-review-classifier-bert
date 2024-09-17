@@ -125,6 +125,7 @@ celerybeat.pid
 .env
 .venv
 env/
+env-cuda/
 venv/
 ENV/
 env.bak/
