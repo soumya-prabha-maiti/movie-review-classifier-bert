@@ -4,12 +4,13 @@
 import logging
 import os
 import re
+from turtle import title
 
 import gradio as gr
 import numpy as np
 import torch
 from dotenv import load_dotenv
-from transformers import BertForSequenceClassification, BertTokenizer, PretrainedConfig
+from transformers import BertTokenizer
 
 from gdrive_utils import GDriveUtils
 from lightning_module import Bert
@@ -147,9 +148,9 @@ interface = gr.Interface(
         gr.Textbox(label="Enter Movie review"),
     ],
     outputs=[
-        gr.Textbox(label="Result"),
+        gr.Textbox(label="Sentiment"),
     ],
-    live=False,  # Optional: updates output as input changes
+    title="Movie Review Sentiment Classifier",
 )
 
 # Launch the interface
