@@ -46,6 +46,28 @@ else:
     print("No GPU available, using CPU")
 
 # %%
+def get_requirements(remove_windows_packages : bool = False) -> None:
+    """Used to print the requirements of the current environment."""
+    import subprocess
+    req = subprocess.run(['pip', 'freeze'], capture_output=True)
+    req = req.stdout.decode()
+    
+    # remove carriage return
+    req = req.replace('\r', '')
+
+    # remove windows packages
+    if remove_windows_packages:
+        windows_packages = ['pywin32', 'tensorflow-intel']
+        packages = []
+        for pkg in req.split('\n'):
+            if not any([pkg.startswith(win_pkg) for win_pkg in windows_packages]):
+                packages.append(pkg)
+        req = '\n'.join(packages)
+
+    return req
+print(f"List of installed python packages:\n{get_requirements()}")
+
+# %%
 # Disable logging from transformers library
 
 loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
